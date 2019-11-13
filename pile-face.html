@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Exercice1: animation d'un vélo</title>
+
+    <script>
+        window.addEventListener("load", function () {
+            scene = document.getElementById('animation');
+            piece = document.createElement('img');
+            piece.id = 'piece';
+            piece.src = 'images/pile.svg';
+            scene.appendChild(piece);
+            demarrer = document.getElementById("demarrer");
+            arreter = document.getElementById("arreter");
+
+            var animation = { // fonction maman
+                deg: 0,                              // deg de rotation        
+                face_1: 'images/pile.svg',          //source de la 1er face 
+                face_2: 'images/face.svg',          // source de la  2eme face
+                jouer: function () {
+                    this.interval = setInterval(execution, 20);
+                },
+                stop: function () {
+                    clearInterval(this.interval);
+                },
+                flip: function () {
+
+                    if (this.deg === 90) {   // si l'image atteint 90 deg  on switch la source d'image pour la nouvelle image et elle commencera le sycle a -90deg
+                        this.deg = -90
+                        tienMoiCA = this.face_1
+                        this.face_1 = this.face_2
+                        this.face_2 = tienMoiCA;
+
+                    }
+                    piece.src = this.face_1;
+                    this.deg++                     // à ce niveau on fais bouger l'image 
+                    piece.style.transform = "rotateY(" + this.deg + "deg)";
+                },
+                RedemarrageParametre: function () {        // reinitialisation des parametres pour le demarage      
+                    this.face_1 = 'images/pile.svg';
+                    this.face_2 = 'images/face.svg';
+                    this.deg = 0;
+                }
+            }
+
+
+            // cette fonction est appelé par le set interval et elle meme elle va appelé la function flip et ca pour que la fonction flip aura la porté                               sur la variable this dans animation ... 
+            function execution() {
+                animation.flip();
+            }
+
+
+
+
+            demarrer.addEventListener("click", function () {
+                animation.RedemarrageParametre();     //  parametres pour le demarage  
+                animation.jouer();
+                demarrer.type = "hidden";
+                arreter.type = "button";
+            });
+            arreter.addEventListener("click", function () {
+                animation.stop();                                 // stop
+                demarrer.type = "button";
+                arreter.type = "hidden";
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <input type="button" id="demarrer" value="Démarrer" />
+    <input type="hidden" id="arreter" value="Arrêter" />
+    <div id="animation">
+    </div>
+
+</body>
+
+</html>

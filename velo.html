@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Exercice2: animation d'un vélo</title>
+  <style>
+    html {
+      background-color: aquamarine;
+    }
+
+    body {
+      width: 80%;
+      margin: auto;
+      background: white;
+    }
+
+    input {
+      margin: 20px;
+      padding: 5px;
+    }
+
+    #animation {
+      position: relative;
+      height: 200px;
+    }
+
+    #velo1,
+    #velo2 {
+      position: absolute;
+      width: 342px;
+      height: 200px;
+    }
+
+    img {
+      position: absolute;
+      display: block;
+    }
+
+    .velo {
+      width: 100%;
+    }
+
+    .roue-arriere {
+      bottom: 8px;
+      left: 8px;
+      width: 122px;
+    }
+
+    .roue-avant {
+      bottom: 8px;
+      left: 209px;
+      width: 122px;
+    }
+
+    p {
+      padding: 20px;
+    }
+  </style>
+
+  <script>
+    window.addEventListener("load", function () {
+      demarrer = document.getElementById("demarrer");
+      arreter = document.getElementById("arreter");
+      scene = document.getElementById("animation");
+      velo1 = document.getElementById("velo1");
+      velo2 = velo1.cloneNode(true);           // clone du velo 1 
+      velo2.setAttribute("id", "velo2");
+      scene.appendChild(velo2);
+      velo2 = document.getElementById("velo2");
+      duree = document.getElementById("duree");
+      width_velo = velo1.getBoundingClientRect().width;     // obtentien du width de maniere dynamique 
+      roue_1_velo_1 = velo1.children[0];        // roue
+      roue_2_velo_1 = velo1.children[1];        // roue
+      roue_1_velo_2 = velo2.children[0];        // roue
+      roue_2_velo_2 = velo2.children[1];        // roue
+      velo2.style.left = -width_velo + "px";    // position du velo 2
+      velo2.style.clipPath = "inset(0px " + width_velo + "px 0px 0px)"; // velo 2 doit etre masqué 
+
+      var animation = {
+        velo2,                      // element HTML
+        velo1,                      // element HTML
+        roue_1_velo_1,              // element HTML
+        roue_2_velo_1,              // element HTML
+        roue_1_velo_2,              // element HTML
+        roue_2_velo_2,              // element HTML       
+        sec: 0,                     // duree  
+        velo_1_demarage: true,      // flag sert à dire que le velo est au position demarage à la fonction (velo_1_Go)
+        path_disparaitre_velo_1: 0, // valeur de proprieté CSS clipPath
+        path_disparaitre_velo_2: 0, // valeur de proprieté CSS clipPath
+        path_Apparaitre_velo_1: width_velo,// valeur de proprieté CSS clipPath
+        path_Apparaitre_velo_2: width_velo,// valeur de proprieté CSS clipPath
+        pixelVelo1: 0,                    // valeur de proprieté CSS LEFT
+        pixelVelo2: -width_velo,          // valeur de proprieté CSS LEFT
+
+        jouer: function () { 
+          this.interval = setInterval(bougerVelo, 5);  
+        },
+        velo_1_position_depart: function () { // reinitialisation des parametre pour la position de depart
+          this.pixelVelo1 = -width_velo;
+          this.path_Apparaitre_velo_1 = width_velo;
+          this.velo1.style.left = -width_velo + "px";
+          this.path_disparaitre_velo_1 = 0;
+          this.velo_1_demarage = false;  // la premiere fois que le velo 1 quitte la scene il faudra l'indiquer à la fonction (velo_1_Go)
+        },
+        velo_2_position_depart: function () { // reinitialisation des parametre pour la position de depart
+          this.pixelVelo2 = -width_velo;
+          this.velo2.style.left = -width_velo + "px";
+          this.path_disparaitre_velo_2 = 0;
+          this.path_Apparaitre_velo_2 = width_velo;
+        },
+        velo_1_faire_disparaitre: function () {
+          this.path_disparaitre_velo_1 += 1;
+          this.velo1.style.clipPath = "inset(0px " + this.path_disparaitre_velo_1 + "px 0px 0px)";
+        },
+        velo_2_faire_disparaitre: function () {
+          this.path_disparaitre_velo_2 += 1;
+          this.velo2.style.clipPath = "inset(0px " + this.path_disparaitre_velo_2 + "px 0px 0px)";
+        },
+        velo_1_Go: function () {
+          this.pixelVelo1 += 1;
+          this.velo1.style.left = this.pixelVelo1 + "px";
+          if (!this.velo_1_demarage) {  // si le velo 1 quitte la scene il faudra le faire reaparaitre pour le prochain sycle
+            this.path_Apparaitre_velo_1 -= 1;
+            this.velo1.style.clipPath = "inset(0px 0px 0px " + this.path_Apparaitre_velo_1 + "px)";
+          }
+          // rotation des roues
+          this.roue_1_velo_1.style.transform = "rotate(" + this.pixelVelo1 + "deg)";
+          this.roue_2_velo_1.style.transform = "rotate(" + this.pixelVelo1 + "deg)";
+        },
+        velo_2_Go: function () {
+          this.pixelVelo2 += 1;
+          this.velo2.style.left = this.pixelVelo2 + "px";
+          this.path_Apparaitre_velo_2 -= 1;
+          this.velo2.style.clipPath = "inset(0px 0px 0px " + this.path_Apparaitre_velo_2 + "px)";
+          this.roue_1_velo_2.style.transform = "rotate(" + this.pixelVelo2 + "deg)";
+          this.roue_2_velo_2.style.transform = "rotate(" + this.pixelVelo2 + "deg)";
+        },
+        reset_parametre_depart: function () {  // reinitialisation de tous parametre pour le depart à 0;
+          this.velo2.style.left = -width_velo + "px";
+          this.velo2.style.clipPath = "inset(0px " + width_velo + "px 0px 0px)";
+          this.velo1.style.clipPath = "inset(0px 0px 0px " + 0 + "px)";
+          this.velo1.style.left = 0 + "px";
+          this.velo_1_demarage = true;
+          this.path_disparaitre_velo_1 = 0;
+          this.path_disparaitre_velo_2 = 0;
+          this.path_Apparaitre_velo_1 = width_velo;
+          this.path_Apparaitre_velo_2 = width_velo;
+          this.pixelVelo1 = 0;
+          this.pixelVelo2 = -width_velo;
+          this.sec = 0;
+          duree.innerHTML = this.sec;
+        },
+        getTime: function () { // affichage de la durée de l'animation
+          this.sec = this.sec + 1;
+          duree.innerHTML = Math.floor(this.sec / 200);
+        },
+
+        stop: function () { // sotp de l'animation
+          clearInterval(this.interval);
+        }
+      };
+
+      function bougerVelo() {
+        // positions des velo par rapport  à la scene  
+        var velo_1_Contact = Math.floor(velo1.getBoundingClientRect().right) >= Math.floor(scene.getBoundingClientRect().right) ? true : false,
+          velo_2_Contact = Math.floor(velo2.getBoundingClientRect().right) >= Math.floor(scene.getBoundingClientRect().right) ? true : false,
+          velo_1_Sorti = Math.floor(velo1.getBoundingClientRect().left) >= Math.floor(scene.getBoundingClientRect().right) ? true : false,
+          velo_2_Sorti = Math.floor(velo2.getBoundingClientRect().left) >= Math.floor(scene.getBoundingClientRect().right) ? true : false,
+          velo_1_Surscene = Math.floor(velo1.getBoundingClientRect().left) >= Math.floor(scene.getBoundingClientRect().left) ? true : false,
+          velo_2_Surscene = Math.floor(velo2.getBoundingClientRect().left) >= Math.floor(scene.getBoundingClientRect().left) ? true : false;
+
+        if (velo_2_Contact || velo_1_Surscene) animation.velo_1_Go(); // le velo bouge sauf s'il est sur scene ou lautre velo ou l'autre velo commenece à 
+        if (velo_1_Contact || velo_2_Surscene) animation.velo_2_Go(); //disparaitre
+
+        if (velo_1_Contact) animation.velo_1_faire_disparaitre();// si le velo entre en contact avec le coté droit de la scene va commencer à disparaitre
+        if (velo_2_Contact) animation.velo_2_faire_disparaitre();
+
+        if (velo_1_Sorti) animation.velo_1_position_depart();// si le velo à quitté la scene il se remetera à la position de demarage 
+        if (velo_2_Sorti) animation.velo_2_position_depart();
+
+        animation.getTime();  // l'affichage de la durée de l'aniamation
+      }
+
+      demarrer.addEventListener("click", function () {
+        animation.reset_parametre_depart();
+        animation.jouer();
+        demarrer.type = "hidden";
+        arreter.type = "button";
+      });
+      arreter.addEventListener("click", function () {
+        animation.stop();
+        demarrer.type = "button";
+        arreter.type = "hidden";
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <input type="button" id="demarrer" value="Démarrer" />
+  <input type="hidden" id="arreter" value="Arrêter" />
+  <div id="animation">
+    <div id="velo1">
+      <img class="roue-arriere" src="images/roue.png" alt="" />
+      <img class="roue-avant" src="images/roue.png" alt="" />
+      <img class="velo" src="images/velo.png" alt="" />
+    </div>
+  </div>
+  <p>Durée de l'animation: <span id="duree">0</span> s</p>
+</body>
+
+</html>
